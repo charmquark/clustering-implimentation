@@ -1,6 +1,7 @@
 import codecs
 import string
 import math
+import random
 
 def read_data(filename):
     """ return list of points from file with structure like
