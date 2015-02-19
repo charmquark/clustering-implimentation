@@ -19,7 +19,7 @@ def read_data(filename):
             data.append((name, coords))
     return data
 
-def process_data(data):
+def clean_data(data):
     """ put the given data into dictionary with key: editors' name and value: the points
         assuming given data is in the format [('haa',[1,2,3,5....]), ...)]
         return a list conists of a dictionary and data withouth editor username
@@ -87,12 +87,26 @@ def gen_new_centers(clusters):
     return centers
 
 def gen_clusters (centers, data):
-    result = {}
-    for points in data:       # number of points
-        for i in range(len(points[1])):
-            assignment = min_squared_euclidean_dist(centers, points[1][i])
-            result[assignment].append(points[1][i])
+    """ returned data format, when k = 3: [([1,2,3,4],[2,2,3,4],[3,2,3,4],....),[],[]]"""
+    k = len(centers)
+    result = [()] * k
+    dict = {}
+    for i, center in enumerate(centers):
+        dict[i] = center      
+        result[i]
+    for point in data:       # number of points
+        assignment = min_squared_euclidean_dist(centers, point[1])
+        index = get_key(dict, assignment)
+        result[index].append(point)
     return result
+
+def get_key(dict, value):
+    """ helper function getting key fiven a value for a dictionary.
+        This is faster
+     """
+    for index, point in dict.iteritems():
+        if point == value:
+            return index
 
 def min_squared_euclidean_dist(centers, point):
     """ return the assignment for the point given several centers as choices"""
