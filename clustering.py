@@ -6,7 +6,7 @@ import argparse
 import sys
 
 class Center(object):
-    """docstring for Center"""
+    """class for the centroid of a cluster"""
     def __init__(self, location):
         super(Center, self).__init__()
         self.location = location
@@ -49,10 +49,35 @@ def random_centers_from_data(k, data):
     random.seed(123)
     centers = [] 
     for i in range(k): # number of ranges
-        rand = random.randint(1, index)    # generate random number in the range of 1 to the length of the data
+        rand = random.randint(0, index)    # generate random number in the range of 1 to the length of the data
         point = data[rand]
         center = Center(point[1])
         centers.append(center)
+    return centers
+
+def distanced_centers_from_data(k, data):
+    """ initialize centers by choosing a random point, 
+    then choosing the furthest away point from the current starting points """
+    centers = []
+    random.seed(123)
+    first_p = data[random.randint(0, len(data))]
+    first = Center(first_p[1])
+    centers.append(first)
+    for i in range(k):
+        max_dist = 0
+        new_center_p = None
+        for point in data:
+            total_distance = 0
+            p = point[1]
+            for center in centers:
+                # print center, p
+                for i in range(len(p)):
+                    total_distance += (center.location[i] - p[i])**2
+            if total_distance > max_dist:
+                max_dist = total_distance
+                new_center_p = point
+        new_center = Center(new_center_p[1])
+        centers.append(new_center)
     return centers
 
 def move_centers(centers):
@@ -98,9 +123,17 @@ def sse(centers):
                 sse += (center.location[i] - p[i])**2
     return sse
 
-def kmeans(data, k):
+def kmeans(data, k, init_method):
     """ run k-means algorithm """
-    centers = random_centers_from_data(k, data)
+    if init_method == 'random':
+        print "using random"
+        centers = random_centers_from_data(k, data)
+    elif init_method == 'distance':
+        print "using distance"
+        centers = distanced_centers_from_data(k, data)
+    else:
+        print "'Error: {0}' is not a valid initilization technique".format(init_method)
+        sys.exit(1)
     gen_clusters(centers, data)
     sse_val = float("infinity")
     iter_num = 1
@@ -112,7 +145,7 @@ def kmeans(data, k):
             center.points = []
         gen_clusters(centers, all_points)
         new_sse = sse(centers)
-        print "SSE before iteration {0}: {1}, after: {2}".format(iter_num, sse_val, new_sse)
+        print "SSE before, after iteration {0}: {1}, {2}".format(iter_num, sse_val, new_sse)
         assert new_sse <= sse_val
         if new_sse == sse_val:
             return centers
@@ -121,17 +154,18 @@ def kmeans(data, k):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', '--clusters', type= int, required=True, help='Input the number of clusters')
-    parser.add_argument('-f', '--filename', required=True, help='Input file name')
-    # parser.add_argument('-m','-method', required = False, help = 'Choose the method for initializing the cluster centers')
+    parser.add_argument('-k', '--clusters', type= int, required=True, help='Number of clusters')
+    parser.add_argument('-f', '--filename', required=True, help='Data file name')
+    parser.add_argument('-i','--init_method', required = False, help = 'Techniqure to choose initial cluster centers. Choices are random or distance')
 
     args = parser.parse_args()
     k = args.clusters
     filename = args.filename
+    init_method = args.init_method
 
     # read file 
     data = standardize(read_data(filename))
-    clusters = kmeans(data, k)
+    clusters = kmeans(data, k, init_method)
     for center in clusters:
         print center
         for point in center.points:
