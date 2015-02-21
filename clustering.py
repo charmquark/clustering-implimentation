@@ -126,10 +126,8 @@ def sse(centers):
 def kmeans(data, k, init_method):
     """ run k-means algorithm """
     if init_method == 'random':
-        print "using random"
         centers = random_centers_from_data(k, data)
     elif init_method == 'distance':
-        print "using distance"
         centers = distanced_centers_from_data(k, data)
     else:
         print "'Error: {0}' is not a valid initilization technique".format(init_method)
@@ -168,9 +166,10 @@ def main():
     clusters = kmeans(data, k, init_method)
     for center in clusters:
         print center
-        for point in center.points:
-            sys.stdout.write(point[0] + ', ')
-        print "\n"
+        # don't print out the people around each center
+        # for point in center.points:
+        #     sys.stdout.write(point[0] + ', ')
+        # print "\n"
 
 if __name__ == '__main__':
     main()
