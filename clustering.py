@@ -15,7 +15,7 @@ class Center(object):
     def __repr__(self):
         # undo log_2(x+1)
         unlogged_loc = [2**(i-1) for i in self.location]
-        return "<Center> at {0}".format(self.location)
+        return "<Center> at {0}, {1} items".format(self.location, len(self.points))
 
 
 def read_data(filename):
@@ -70,7 +70,6 @@ def distanced_centers_from_data(k, data):
             total_distance = 0
             p = point[1]
             for center in centers:
-                # print center, p
                 for i in range(len(p)):
                     total_distance += (center.location[i] - p[i])**2
             if total_distance > max_dist:
@@ -89,15 +88,51 @@ def move_centers(centers):
             for i, elem in enumerate(point[1]):
                 avg[i] += elem
         if len(center.points) > 0:
+            # deal with empty cluster in a sec
             avg = [i/len(center.points) for i in avg]
             center.location = avg
+    # now deal with empty clusters
+    empty_centers = False
+    for center in centers:
+        if len(center.points) == 0:
+            empty_centers = True
+            max_dist = 0
+            new_pt = None
+            for c in centers:
+                # find point furthest away from its cluster
+                # this finds the point furthest from its center,
+                # then moves the empty center to that point
+                max_idx = None
+                for j, point in enumerate(c.points):
+                    p = point[1]
+                    dist = 0
+                    for i in range(len(point)):
+                        dist += (center.location[i] - p[i])**2
+                    if dist > max_dist:
+                        max_dist = dist
+                        max_idx = j
+                        new_pt = c.points[max_idx]
+            center.location = new_pt[1]
+    if empty_centers:
+        # remake clusters if there was an empty one
+        all_points = []
+        for center in centers:
+            all_points.extend(center.points)
+            center.points = []
+        gen_clusters(centers, all_points)
+
+
+def distance(center, point):
+    dist = 0
+    for i in range(len(point)):
+        dist += (center.location[i] - p[i])**2
+    return dist
 
 def gen_clusters(centers, data):
     """ returned data format, when k = 3: [([1,2,3,4],[2,2,3,4],[3,2,3,4],....),[],[]]"""
     k = len(centers)
-    for point in data:       # number of points
+    for point in data:
         assignment = min_squared_euclidean_dist(centers, point[1])
-        # print result[index]
         assignment.points.append(point)
 
 def min_squared_euclidean_dist(centers, point):
