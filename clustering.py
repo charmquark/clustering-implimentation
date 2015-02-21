@@ -55,23 +55,6 @@ def random_centers_from_data(k, data):
         centers.append(center)
     return centers
 
-def gen_new_centers(clusters):
-    """ return a list of new cluster centers 
-        given the current clusters dictionary (currently without their id)
-    """
-    centers = []
-    for key, values in clusters.iteritems():
-        num_points = len(values)     # number of points in data
-        d = len(values[0])   #dimension of the data
-        cluster_sum=[0] * d
-        for i in range(num_points):     # each point within the cluster
-            for j in range(d):              # each dimension of each point
-                cluster_sum[j] += value[i][j]
-        for each_sum in cluster_sum:
-            centers.append[each_sum/num_points]
-        centers.append(centers)
-    return centers
-
 def move_centers(centers):
     """ given a list of centers, move each center based on where the average 
     of the points assigned to it lies """
