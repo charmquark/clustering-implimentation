@@ -213,10 +213,6 @@ def main():
     clusters = kmeans(data, k, init_method)
     for center in clusters:
         print center
-        # don't print out the people around each center
-        # for point in center.points:
-        #     sys.stdout.write(point[0] + ', ')
-        # print "\n"
 
 if __name__ == '__main__':
     main()
