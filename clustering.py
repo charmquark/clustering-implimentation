@@ -184,13 +184,14 @@ def kmeans(data, k, init_method):
     iter_num = 1
     while True:
         move_centers(centers)
+        before_sse = sse(centers)
         all_points = []
         for center in centers:
             all_points.extend(center.points)
             center.points = []
         gen_clusters(centers, all_points)
         new_sse = sse(centers)
-        print "SSE before, after iteration {0}: {1}, {2}".format(iter_num, sse_val, new_sse)
+        print "SSE before, after iteration {0}: {1}, {2}".format(iter_num, before_sse, new_sse)
         assert new_sse <= sse_val
         if new_sse == sse_val:
             return centers
