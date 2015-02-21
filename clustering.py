@@ -5,6 +5,15 @@ import random
 import argparse
 import sys
 
+"""
+clustering.py by Brian Charous and Yawen Chen
+An implementation of k-means clustering technique
+To compile: clustering.py -k (number of clusters) -f (filename) -i (initialization method: either random or distance, default is random)
+For example: 
+                    python clustering.py -k 5 -f wiki.txt -i random
+                    python clustering.py -k 5 -f wiki.txt -i distance
+                    python clustering.py -k 5 -f wiki.txt  #default method is random
+"""
 class Center(object):
     """class for the centroid of a cluster"""
     def __init__(self, location):
@@ -160,13 +169,16 @@ def sse(centers):
 
 def kmeans(data, k, init_method):
     """ run k-means algorithm """
-    if init_method == 'random':
-        centers = random_centers_from_data(k, data)
-    elif init_method == 'distance':
-        centers = distanced_centers_from_data(k, data)
+    if init_method:
+        if init_method == 'random':
+            centers = random_centers_from_data(k, data)
+        elif init_method == 'distance':
+            centers = distanced_centers_from_data(k, data)
+        else:
+            print "'Error: {0}' is not a valid initilization technique. Please choose from random or distance".format(init_method)
+            sys.exit(1)
     else:
-        print "'Error: {0}' is not a valid initilization technique".format(init_method)
-        sys.exit(1)
+        centers = random_centers_from_data(k, data)
     gen_clusters(centers, data)
     sse_val = float("infinity")
     iter_num = 1
