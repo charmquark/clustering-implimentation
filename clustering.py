@@ -58,7 +58,7 @@ def random_centers_from_data(k, data):
     random.seed(123)
     centers = [] 
     for i in range(k): # number of ranges
-        rand = random.randint(0, index)    # generate random number in the range of 1 to the length of the data
+        rand = random.randint(0, index-1)    # generate random number in the range of 1 to the length of the data
         point = data[rand]
         center = Center(point[1])
         centers.append(center)
@@ -69,7 +69,7 @@ def distanced_centers_from_data(k, data):
     then choosing the furthest away point from the current starting points """
     centers = []
     random.seed(123)
-    first_p = data[random.randint(0, len(data))]
+    first_p = data[random.randint(0, len(data)-1)]
     first = Center(first_p[1])
     centers.append(first)
     for i in range(k-1):
