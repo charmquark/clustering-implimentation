@@ -72,7 +72,7 @@ def distanced_centers_from_data(k, data):
     first_p = data[random.randint(0, len(data))]
     first = Center(first_p[1])
     centers.append(first)
-    for i in range(k):
+    for i in range(k-1):
         max_dist = 0
         new_center_p = None
         for point in data:
@@ -111,7 +111,6 @@ def move_centers(centers):
                 # find point furthest away from its cluster
                 # this finds the point furthest from its center,
                 # then moves the empty center to that point
-                max_idx = None
                 for j, point in enumerate(c.points):
                     p = point[1]
                     dist = 0
@@ -119,8 +118,7 @@ def move_centers(centers):
                         dist += (center.location[i] - p[i])**2
                     if dist > max_dist:
                         max_dist = dist
-                        max_idx = j
-                        new_pt = c.points[max_idx]
+                        new_pt = c.points[j]
             center.location = new_pt[1]
     if empty_centers:
         # remake clusters if there was an empty one
@@ -130,7 +128,6 @@ def move_centers(centers):
             center.points = []
         gen_clusters(centers, all_points)
 
-
 def distance(center, point):
     dist = 0
     for i in range(len(point)):
@@ -138,7 +135,6 @@ def distance(center, point):
     return dist
 
 def gen_clusters(centers, data):
-    """ returned data format, when k = 3: [([1,2,3,4],[2,2,3,4],[3,2,3,4],....),[],[]]"""
     k = len(centers)
     for point in data:
         assignment = min_squared_euclidean_dist(centers, point[1])
