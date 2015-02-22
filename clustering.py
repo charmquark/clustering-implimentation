@@ -102,6 +102,7 @@ def move_centers(centers):
             center.location = avg
     # now deal with empty clusters
     empty_centers = False
+    removed_pts = []
     for center in centers:
         if len(center.points) == 0:
             empty_centers = True
@@ -119,10 +120,12 @@ def move_centers(centers):
                     if dist > max_dist:
                         max_dist = dist
                         new_pt = c.points[j]
+                        removed_pts.append(c.points.pop(j))
             center.location = new_pt[1]
     if empty_centers:
         # remake clusters if there was an empty one
         all_points = []
+        all_points.extend(removed_pts)
         for center in centers:
             all_points.extend(center.points)
             center.points = []
