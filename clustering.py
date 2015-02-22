@@ -100,36 +100,36 @@ def move_centers(centers):
             # deal with empty cluster in a sec
             avg = [i/len(center.points) for i in avg]
             center.location = avg
-    # now deal with empty clusters
-    empty_centers = False
-    removed_pts = []
-    for center in centers:
-        if len(center.points) == 0:
-            empty_centers = True
-            max_dist = 0
-            new_pt = None
-            for c in centers:
-                # find point furthest away from its cluster
-                # this finds the point furthest from its center,
-                # then moves the empty center to that point
-                for j, point in enumerate(c.points):
-                    p = point[1]
-                    dist = 0
-                    for i in range(len(point)):
-                        dist += (center.location[i] - p[i])**2
-                    if dist > max_dist:
-                        max_dist = dist
-                        new_pt = c.points[j]
-                        removed_pts.append(c.points.pop(j))
-            center.location = new_pt[1]
-    if empty_centers:
-        # remake clusters if there was an empty one
-        all_points = []
-        all_points.extend(removed_pts)
-        for center in centers:
-            all_points.extend(center.points)
-            center.points = []
-        gen_clusters(centers, all_points)
+    # # now deal with empty clusters
+    # empty_centers = False
+    # removed_pts = []
+    # for center in centers:
+    #     if len(center.points) == 0:
+    #         empty_centers = True
+    #         max_dist = 0
+    #         new_pt = None
+    #         for c in centers:
+    #             # find point furthest away from its cluster
+    #             # this finds the point furthest from its center,
+    #             # then moves the empty center to that point
+    #             for j, point in enumerate(c.points):
+    #                 p = point[1]
+    #                 dist = 0
+    #                 for i in range(len(point)):
+    #                     dist += (center.location[i] - p[i])**2
+    #                 if dist > max_dist:
+    #                     max_dist = dist
+    #                     new_pt = c.points[j]
+    #                     removed_pts.append(c.points.pop(j))
+    #         center.location = new_pt[1]
+    # if empty_centers:
+    #     # remake clusters if there was an empty one
+    #     all_points = []
+    #     all_points.extend(removed_pts)
+    #     for center in centers:
+    #         all_points.extend(center.points)
+    #         center.points = []
+    #     gen_clusters(centers, all_points)
 
 def distance(center, point):
     dist = 0
@@ -139,6 +139,8 @@ def distance(center, point):
 
 def gen_clusters(centers, data):
     k = len(centers)
+    for center in centers:
+        center.points = []
     for point in data:
         assignment = min_squared_euclidean_dist(centers, point[1])
         assignment.points.append(point)
@@ -166,6 +168,24 @@ def sse(centers):
                 sse += (center.location[i] - p[i])**2
     return sse
 
+def point_furthest_from_center(centers):
+    """ find the point furthest away from its center and the center
+    to which it corresponds """
+    max_dist = 0
+    return_pt = None
+    return_center = None
+    for c in centers:
+        for j, point in enumerate(c.points):
+            p = point[1]
+            dist = 0
+            for i in range(len(point)):
+                dist += (c.location[i] - p[i])**2
+            if dist > max_dist:
+                max_dist = dist
+                return_pt = c.points[j]
+                return_center = c
+    return (return_center, return_pt)
+
 def kmeans(data, k, init_method):
     """ run k-means algorithm """
     if init_method:
@@ -184,14 +204,26 @@ def kmeans(data, k, init_method):
     while True:
         move_centers(centers)
         before_sse = sse(centers)
-        all_points = []
-        for center in centers:
-            all_points.extend(center.points)
-            center.points = []
-        gen_clusters(centers, all_points)
+        gen_clusters(centers, data)
+
+        # deal with empty clusters
+        empty_centers = False
+        while True:
+            for center in centers:
+                if len(center.points) == 0:
+                    # empty center
+                    empty_centers = True
+                    # get furthest away point, reassign empty center's location
+                    remove_c, new_pt = point_furthest_from_center(centers)
+                    center.location = new_pt[1]
+                    gen_clusters(centers, data)
+                    empty_centers = False
+            if not empty_centers:
+                break
+
         new_sse = sse(centers)
         print "SSE before, after iteration {0}: {1}, {2}".format(iter_num, before_sse, new_sse)
-        assert new_sse <= sse_val
+        assert new_sse <= before_sse
         if new_sse == sse_val:
             return centers
         sse_val = new_sse
