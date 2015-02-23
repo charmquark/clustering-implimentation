@@ -6,13 +6,16 @@ import argparse
 import sys
 
 """
-clustering.py by Brian Charous and Yawen Chen
+clustering2.py by Brian Charous and Yawen Chen
 An implementation of k-means clustering technique
-To compile: clustering.py -k (number of clusters) -f (filename) -i (initialization method: either random or distance, default is random)
+PART2: added argument -nr. put -nr would trigger normalizing row for part 2
+To compile: clustering.py -k (number of clusters) -f (filename) -i (initialization method: either random or distance, default is random) -nr
 For example: 
-                    python clustering.py -k 5 -f wiki.txt -i random
-                    python clustering.py -k 5 -f wiki.txt -i distance
-                    python clustering.py -k 5 -f wiki.txt  #default method is random
+                    with normalize row: python clustering2.py -k 5 -f wiki.txt -i random -nr
+                    w/o normalie row, with log: python clustering2.py -k 5 -f wiki.txt -i random 
+                    python clustering2.py -k 5 -f wiki.txt -i distance 
+                    python clustering2.py -k 5 -f wiki.txt  #default method is random -nr
+                    etc etc
 """
 class Center(object):
     """class for the centroid of a cluster"""
@@ -41,13 +44,13 @@ def read_data(filename):
             data.append((name, coords))
     return data
 
-def normalize_row(data):
+def normalize_rows(data):
     """ normalize the row with the method: -dividing each row by the Euclidean magnitude of the row """
-    norm_row = []
     normalized_data = []
     for item in data:
         point = item[1]
         magnitude = 0
+        norm_row = []
         for d in range(len(point)):  # get the magnitude of this row
             magnitude += (point[d] **2)
         magnitude = magnitude ** (1/2)  # square root of the sum of squared values 
@@ -171,8 +174,8 @@ def point_furthest_from_center(centers):
                 return_center = c
     return (return_center, return_pt)
 
-def kmeans(data, k, init_method, normalize_row):
-    """ run k-means algorithm, normalize_row set to False if not given """
+def kmeans(data, k, init_method):
+    """ run k-means algorithm"""
     if init_method:
         if init_method == 'random':
             centers = random_centers_from_data(k, data)
@@ -227,8 +230,12 @@ def main():
     normalize_row =args.normalize_row
 
     # read file 
-    data = standardize(read_data(filename))
-    clusters = kmeans(data, k, init_method, normalize_row)
+    if normalize_row:
+        data = normalize_rows(read_data(filename))
+        print "data set up!"
+    else: 
+        data = standardize(read_data(filename))
+    clusters = kmeans(data, k, init_method)
     for center in clusters:
         print center
 
