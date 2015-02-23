@@ -8,14 +8,14 @@ import sys
 """
 clustering2.py by Brian Charous and Yawen Chen
 An implementation of k-means clustering technique
-PART2 uses normalize_row to normalize data without calculating the log.
-To compile: clustering.py -k (number of clusters) -f (filename) -i (initialization method: either random or distance, default is random) 
+PART2: added argument -nr. put -nr would trigger normalizing row for part 2
+To compile: clustering.py -k (number of clusters) -f (filename) -i (initialization method: either random or distance, default is random) -nr
 For example: 
-                     python clustering2.py -k 5 -f wiki.txt -i random
-                     python clustering2.py -k 5 -f wiki.txt -i random 
+                    with normalize row: python clustering2.py -k 5 -f wiki.txt -i random -nr
+                    w/o normalie row, with log: python clustering2.py -k 5 -f wiki.txt -i random 
                     python clustering2.py -k 5 -f wiki.txt -i distance 
-                    python clustering2.py -k 5 -f wiki.txt  #default method is random -
-
+                    python clustering2.py -k 5 -f wiki.txt  #default method is random -nr
+                    etc etc
 """
 class Center(object):
     """class for the centroid of a cluster"""
@@ -23,9 +23,6 @@ class Center(object):
         super(Center, self).__init__()
         self.location = location
         self.points = []
-
-    def __repr__(self):
-        return "<Center> at {0}, {1} items".format(self.location, len(self.points))
 
 def read_data(filename):
     """ return list of points from file with structure like
@@ -56,6 +53,14 @@ def normalize_rows(data):
         normalized_data.append ((item[0], norm_row))
     return normalized_data
 
+def standardize(data):
+    """ convert every value x in data to log(x+1) """
+    std_data = []
+    for entry in data:
+        pts = entry[1]
+        log_pts = [math.log(p+1)/math.log(2) for p in pts]
+        std_data.append((entry[0], log_pts))
+    return std_data
 
 def random_centers_from_data(k, data):
     """ generate random centers with given data 
@@ -211,19 +216,30 @@ def main():
     parser.add_argument('-k', '--clusters', type= int, required=True, help='Number of clusters')
     parser.add_argument('-f', '--filename', required=True, help='Data file name')
     parser.add_argument('-i','--init_method', required = False, help = 'Techniqure to choose initial cluster centers. Choices are random or distance')
+    parser.add_argument('-nr','--normalize_row', action= 'store_true', required = False, default=False, help ='choose if the user wants to normalize the row without standardizing the data with log')
     args = parser.parse_args()
     k = args.clusters
     filename = args.filename
     init_method = args.init_method
+    normalize_row =args.normalize_row
 
     # read file 
-    data = normalize_rows(read_data(filename))
-    print "data set up!"
+    if normalize_row:
+        data = normalize_rows(read_data(filename))
+        print "data set up!"
+    else: 
+        data = standardize(read_data(filename))
     clusters = kmeans(data, k, init_method)
 
-    for center in clusters:
-        print center
+    if normalize_row:
+        for center in clusters:
+            print "<Center> at {0}, {1} items".format(center.location, len(center.points))
+    else: 
+        for center in clusters:
+            unlogged_loc = [2**(i-1) for i in center.location]
+            print "<Center> at {0}, {1} items".format(center.location, len(center.points))
               
+
 if __name__ == '__main__':
     main()
 
