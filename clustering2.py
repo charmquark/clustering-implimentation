@@ -47,7 +47,8 @@ def normalize_rows(data):
         norm_row = []
         for d in range(len(point)):  # get the magnitude of this row
             magnitude += (point[d] **2)
-        magnitude = magnitude ** (1/2)  # square root of the sum of squared values 
+        magnitude = math.sqrt(magnitude) # square root of the sum of squared values 
+        print magnitude
         for i in range (len(point)):    # normalize row
             norm_row.append(point[i]/magnitude)
         normalized_data.append ((item[0], norm_row))
@@ -238,8 +239,7 @@ def main():
         for center in clusters:
             unlogged_loc = [2**(i-1) for i in center.location]
             print "<Center> at {0}, {1} items".format(center.location, len(center.points))
-            
-    
+              
 
 if __name__ == '__main__':
     main()
