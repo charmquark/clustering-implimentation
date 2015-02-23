@@ -24,12 +24,6 @@ class Center(object):
         self.location = location
         self.points = []
 
-    def __repr__(self):
-        # undo log_2(x+1)
-        unlogged_loc = [2**(i-1) for i in self.location]
-        return "<Center> at {0}, {1} items".format(self.location, len(self.points))
-
-
 def read_data(filename):
     """ return list of points from file with structure like
     (name, [x, y, q, r]), where x, y, q, r are some integers """
@@ -236,8 +230,16 @@ def main():
     else: 
         data = standardize(read_data(filename))
     clusters = kmeans(data, k, init_method)
-    for center in clusters:
-        print center
+
+    if normalize_row:
+        for center in clusters:
+            print "<Center> at {0}, {1} items".format(center.location, len(center.points))
+    else: 
+        for center in clusters:
+            unlogged_loc = [2**(i-1) for i in center.location]
+            print "<Center> at {0}, {1} items".format(center.location, len(center.points))
+            
+    
 
 if __name__ == '__main__':
     main()
